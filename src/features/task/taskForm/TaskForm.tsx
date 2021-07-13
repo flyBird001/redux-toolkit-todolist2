@@ -2,8 +2,8 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createNewTask,
+  editTask,
   fetchTasks,
-  createTask,
   handleModalClose,
   selectedTask,
   handleTaskEidt,
@@ -36,11 +36,14 @@ const TaskForm: React.FC<ProType> = ({ edit }) => {
     reset();
     dispatch(fetchTasks());
   };
-  const handleEdit = (data: Inputs) => {
-    console.log(data);
+  //Task編集
+  const handleEdit = async (data: Inputs) => {
+    //console.log(data);
     const sendData = { ...currentTask, title: data.taskTitle };
-    dispatch(handleTaskEidt(sendData));
+    await editTask(sendData);
+    //dispatch(handleTaskEidt(sendData));
     dispatch(handleModalClose(false));
+    dispatch(fetchTasks());
   };
   const handleClose = () => {
     //setOpen(false);

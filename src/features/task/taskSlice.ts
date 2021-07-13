@@ -42,7 +42,31 @@ export const createNewTask = async (title: string): Promise<void> => {
       .collection("tasks")
       .add({ title: title, completed: false, datetime: dateTime });
   } catch (error) {
-    console.log("firebase write err", error);
+    console.log("firebase write err:", error);
+  }
+};
+
+// Update Task to FireBase DataBase
+export const editTask = async (task: Task): Promise<void> => {
+  try {
+    const dateTime = firebase.firestore.Timestamp.fromDate(new Date());
+    await db
+      .collection("tasks")
+      .doc(task.id)
+      .set(
+        { title: task.title, completed: task.completed, datetime: dateTime },
+        { merge: true }
+      );
+  } catch (error) {
+    console.log("firebase update err:", error);
+  }
+};
+// Firebase data delete
+export const deleteTask = async (task: Task): Promise<void> => {
+  try {
+    await db.collection("tasks").doc(task.id).delete();
+  } catch (error) {
+    console.log("firebase delete err:", error);
   }
 };
 // Slice作成
@@ -53,18 +77,18 @@ export const taskSlice = createSlice({
   initialState,
   // action 作成
   reducers: {
-    // create task action
-    // Stateを反映する
-    createTask: (state, action) => {
-      //
-      state.idCount++;
-      const newTask: Task = {
-        id: String(state.idCount),
-        title: action.payload,
-        completed: false,
-      };
-      state.tasks = [newTask, ...state.tasks];
-    },
+    // // create task action
+    // // Stateを反映する
+    // createTask: (state, action) => {
+    //   //
+    //   state.idCount++;
+    //   const newTask: Task = {
+    //     id: String(state.idCount),
+    //     title: action.payload,
+    //     completed: false,
+    //   };
+    //   state.tasks = [newTask, ...state.tasks];
+    // },
     //
     handleModalOpen: (state, action) => {
       state.isModalOpen = action.payload;
@@ -106,7 +130,7 @@ export const taskSlice = createSlice({
 });
 
 export const {
-  createTask,
+  //createTask,
   handleModalOpen,
   handleModalClose,
   handleSelectedTask,

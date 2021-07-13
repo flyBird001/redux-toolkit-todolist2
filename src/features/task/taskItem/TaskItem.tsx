@@ -4,11 +4,15 @@ import Modal from "@material-ui/core/Modal";
 import { useDispatch } from "react-redux";
 import {
   handleModalOpen,
+  deleteTask,
   handleModalClose,
   selectIsModalOpen,
   handleSelectedTask,
   handleTaskDelete,
   handleTaskStatus,
+  editTask,
+  fetchTasks,
+  taskSlice,
 } from "../taskSlice";
 import { useSelector } from "react-redux";
 //import { selectIsModalOpen } from "../taskSlice";
@@ -17,6 +21,7 @@ import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import styles from "./TaskItem.module.scss";
 import TaskForm from "../taskForm/TaskForm";
+import { AppDispatch } from "../../../app/store";
 
 type Task = {
   id: string;
@@ -28,7 +33,7 @@ interface ProTypes {
   task: Task;
 }
 const TaskItem: React.FC<ProTypes> = ({ task }) => {
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const isModalOpen = useSelector(selectIsModalOpen);
   // Modal action
   //const [open, setOpen] = React.useState(false);
@@ -45,6 +50,18 @@ const TaskItem: React.FC<ProTypes> = ({ task }) => {
     dispatch(handleModalClose(false));
   };
 
+  // checkbox event
+  const handleCheck = async () => {
+    const newTask = { ...task, completed: !task.completed };
+    await editTask(newTask);
+    dispatch(fetchTasks());
+  };
+  // taske delete
+  const handleTaskDelete = async () => {
+    await deleteTask(task);
+    dispatch(fetchTasks());
+  };
+  // TaskItem Html
   return (
     <div className={styles.root}>
       <div className={styles.title}>
@@ -55,7 +72,7 @@ const TaskItem: React.FC<ProTypes> = ({ task }) => {
         <Checkbox
           checked={task.completed}
           //onChange={() => console.log(`check ${task.id}`)}
-          onChange={() => dispatch(handleTaskStatus(task.id))}
+          onChange={handleCheck}
           className={styles.checkbox}
         />
         {/* 編集ボダン */}
@@ -66,7 +83,7 @@ const TaskItem: React.FC<ProTypes> = ({ task }) => {
         <button
           className={styles.button_delete}
           //onClick={() => console.log(`delete ${task.id}`)}
-          onClick={() => dispatch(handleTaskDelete(task.id))}
+          onClick={handleTaskDelete}
         >
           <DeleteIcon />
         </button>
