@@ -19,7 +19,7 @@ import styles from "./TaskItem.module.scss";
 import TaskForm from "../taskForm/TaskForm";
 
 type Task = {
-  id: number;
+  id: string;
   title: string;
   completed: boolean;
 };

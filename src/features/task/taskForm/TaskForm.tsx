@@ -1,6 +1,8 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  createNewTask,
+  fetchTasks,
   createTask,
   handleModalClose,
   selectedTask,
@@ -9,6 +11,7 @@ import {
 import styles from "./TaskForm.module.scss";
 import TextField from "@material-ui/core/TextField";
 import { useForm } from "react-hook-form";
+import { AppDispatch } from "../../../app/store";
 
 type Inputs = {
   taskTitle: string;
@@ -17,7 +20,8 @@ type ProType = {
   edit?: boolean;
 };
 const TaskForm: React.FC<ProType> = ({ edit }) => {
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
+
   const currentTask = useSelector(selectedTask);
   const {
     register,
@@ -26,9 +30,11 @@ const TaskForm: React.FC<ProType> = ({ edit }) => {
     formState: { errors },
   } = useForm();
 
-  const handleCreate = (data: Inputs) => {
-    dispatch(createTask(data.taskTitle));
+  const handleCreate = async (data: Inputs) => {
+    //dispatch(createTask(data.taskTitle));
+    await createNewTask(data.taskTitle);
     reset();
+    dispatch(fetchTasks());
   };
   const handleEdit = (data: Inputs) => {
     console.log(data);

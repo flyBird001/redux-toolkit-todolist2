@@ -1,5 +1,7 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunk, RootState } from "../../app/store";
+import { db } from "../../firebase";
+import firebase from "firebase/app";
 import { Task } from "./taskItem/TaskItem";
 
 // state 作成
@@ -13,11 +15,36 @@ interface taskState {
 //　初期state
 const initialState: taskState = {
   idCount: 1,
-  tasks: [{ id: 1, title: "Task-Redux", completed: false }],
-  selectedTask: { id: 0, title: "", completed: false },
+  tasks: [],
+  selectedTask: { id: "", title: "", completed: false },
   isModalOpen: false,
 };
 
+// fetch firebase task createAsyncThunk
+// FireBase からTaskを取得
+export const fetchTasks = createAsyncThunk("task/getAllTasks", async () => {
+  const res = await db.collection("tasks").orderBy("datetime", "desc").get();
+  const allTasks = res.docs.map((doc) => ({
+    id: doc.id,
+    title: doc.data().title,
+    completed: doc.data().completed,
+  }));
+  const taskNumber = allTasks.length;
+  const reTasks = { allTasks, taskNumber };
+  return reTasks;
+});
+
+// New Task To FireBase DataBase
+export const createNewTask = async (title: string): Promise<void> => {
+  try {
+    const dateTime = firebase.firestore.Timestamp.fromDate(new Date());
+    await db
+      .collection("tasks")
+      .add({ title: title, completed: false, datetime: dateTime });
+  } catch (error) {
+    console.log("firebase write err", error);
+  }
+};
 // Slice作成
 export const taskSlice = createSlice({
   // 名称
@@ -32,7 +59,7 @@ export const taskSlice = createSlice({
       //
       state.idCount++;
       const newTask: Task = {
-        id: state.idCount,
+        id: String(state.idCount),
         title: action.payload,
         completed: false,
       };
@@ -69,6 +96,12 @@ export const taskSlice = createSlice({
         task.completed = !task.completed;
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(fetchTasks.fulfilled, (state, action) => {
+      state.tasks = action.payload.allTasks;
+      state.idCount = action.payload.taskNumber;
+    });
   },
 });
 
